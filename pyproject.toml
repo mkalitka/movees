@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "movees"
-version = "0.2.0"
+version = "0.2.1"
 description = "A database of movies with cli."
 authors = ["mkalitka <mikolaj.kalitka@proton.me>"]
 license = "MIT"
