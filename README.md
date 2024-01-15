@@ -31,3 +31,8 @@ or use poetry:
 poetry install
 poetry run python3 -m movees
 ```
+
+you can also specify database file path:
+```
+MOVEES_DB_PATH="database.db" python3 -m movees
+```

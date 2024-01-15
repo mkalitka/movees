@@ -18,9 +18,7 @@ class MoviePerson(BaseModel):
     role = peewee.CharField()
 
     class Meta:
-        indexes = (
-            (("movie", "person"), True),
-        )
+        indexes = ((("movie", "person"), True),)
 
 
 def add_movie(title, year, people):
