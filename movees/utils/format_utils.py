@@ -6,7 +6,7 @@ def format_movie(movie):
     people = people[:-2]
     if people == "":
         return f"    {movie['title']} ({movie['year']})"
-    return f"    {movie['title']} ({movie['year']}) by {people}"
+    return f"    {movie['title']} ({movie['year']}) with {people}"
 
 
 def format_person(person):

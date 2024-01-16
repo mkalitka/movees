@@ -1,8 +1,9 @@
 import requests
 
+from movees import db
 from movees.db import crud
 from movees.responses.generic import generic
-from movees.responses.errors import not_found
+from movees.responses.errors import not_found, service_unavailable
 from movees.responses import Message
 
 
@@ -12,12 +13,15 @@ class Api:
         self.port = port
         self.api_key = None
         self.remote = False if host is None else True
+        if not self.remote:
+            db.init()
+
 
     def _create_response(self, response):
         try:
             status_code = response["status_code"]
         except KeyError:
-            return not_found(message=Message.NOT_FOUND)
+            return not_found()
 
         try:
             data = response["data"]
@@ -32,32 +36,45 @@ class Api:
         return generic(status_code, data=data, message=message)
 
     def _get(self, path):
-        return self._create_response(
-            requests.get(
-                f"http://{self.host}:{self.port}{path}",
-            ).json()
-        )
+        try:
+            return self._create_response(
+                requests.get(
+                    f"http://{self.host}:{self.port}{path}",
+                ).json()
+            )
+        except requests.exceptions.ConnectionError:
+            return service_unavailable()
 
     def _post(self, path):
-        return self._create_response(
-            requests.post(
-                f"http://{self.host}:{self.port}{path}",
-            ).json()
-        )
+        try:
+            return self._create_response(
+                requests.post(
+                    f"http://{self.host}:{self.port}{path}",
+                ).json()
+            )
+        except requests.exceptions.ConnectionError:
+            return service_unavailable()
+
 
     def _put(self, path):
-        return self._create_response(
-            requests.put(
-                f"http://{self.host}:{self.port}{path}",
-            ).json()
-        )
+        try:
+            return self._create_response(
+                requests.put(
+                    f"http://{self.host}:{self.port}{path}",
+                ).json()
+            )
+        except requests.exceptions.ConnectionError:
+            return service_unavailable()
 
     def _delete(self, path):
-        return self._create_response(
-            requests.delete(
-                f"http://{self.host}:{self.port}{path}",
-            ).json()
-        )
+        try:
+            return self._create_response(
+                requests.delete(
+                    f"http://{self.host}:{self.port}{path}",
+                ).json()
+            )
+        except requests.exceptions.ConnectionError:
+            return service_unavailable()
 
     def add_movie(self, title, year, people):
         if self.remote:
@@ -134,3 +151,9 @@ class Api:
             return self._delete(f"/person?name={name}")
         else:
             return crud.delete_person(name)
+
+    def reset(self):
+        if self.remote:
+            return self._post("/reset")
+        else:
+            return crud.reset()

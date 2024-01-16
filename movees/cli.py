@@ -10,6 +10,7 @@ def create_parser():
         description="A database of movies, songs and books.",
         epilog="Thank you for using movees!",
     )
+
     subparsers = parser.add_subparsers(
         dest="subcommand",
     )
@@ -48,24 +49,42 @@ def create_parser():
         help="connect to a remote server",
     )
 
-    parser_remote.add_argument(
+    remote_subparsers = parser_remote.add_subparsers(
+        dest="action",
+        required=True,
+    )
+
+    # remote set subparser
+    parser_remote_set = remote_subparsers.add_parser(
+        "set",
+        help="set the remote server",
+    )
+
+    parser_remote_set.add_argument(
         "-H",
         "--host",
+        required=True,
         help="host of the remote server",
     )
 
-    parser_remote.add_argument(
+    parser_remote_set.add_argument(
         "-p",
         "--port",
         type=int,
+        required=True,
         help="port of the remote server",
     )
 
-    parser_remote.add_argument(
-        "-c",
-        "--clear",
-        action="store_true",
-        help="use local database instead of remote database",
+    # remote show subparser
+    remote_subparsers.add_parser(
+        "show",
+        help="show the remote server",
+    )
+
+    # remote unset subparser
+    remote_subparsers.add_parser(
+        "unset",
+        help="clear the remote server",
     )
 
     # list subparser

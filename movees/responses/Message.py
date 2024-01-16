@@ -8,6 +8,7 @@ class Message(str, Enum):
     ADD_PERSON = "Person %s has been added."
     DELETE_PERSON = "Person %s has been deleted."
     UPDATE_PERSON = "Person %s has been updated."
+    RESET_DATABASE = "Database has been reset."
 
     MOVIE_ALREADY_EXISTS = "Movie %s already exists."
     MOVIE_NOT_FOUND = "Movie %s not found."
@@ -18,6 +19,8 @@ class Message(str, Enum):
     INVALID_REQUEST = "Invalid request."
     INVALID_METHOD = "Method not allowed."
     INVALID_PERSON = "Invalid person format."
+
+    SERVICE_UNAVAILABLE = "Service unavailable."
 
     def __str__(self):
         return self.value

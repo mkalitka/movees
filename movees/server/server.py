@@ -3,12 +3,13 @@ from typing import List
 import fastapi
 import uvicorn
 
-
+from movees import db
 from movees.db import crud
 from movees.server.response import create_json_response
 from movees.responses import Message
 from movees.responses.successes import success
 from movees.responses.errors import not_found, invalid, invalid_method
+
 
 app = fastapi.FastAPI(default_response_class=fastapi.responses.JSONResponse)
 
@@ -20,12 +21,12 @@ async def validation_exception_handler(request, exc):
 
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    return create_json_response(not_found(message=Message.NOT_FOUND))
+    return create_json_response(not_found())
 
 
 @app.exception_handler(405)
 async def method_not_allowed_handler(request, exc):
-    return create_json_response(invalid_method(message=Message.INVALID_METHOD))
+    return create_json_response(invalid_method())
 
 
 @app.get("/")
@@ -98,5 +99,12 @@ async def delete_person(name):
     return create_json_response(crud.delete_person(name))
 
 
+@app.post("/reset")
+async def reset():
+    return create_json_response(crud.reset())
+
+
 def run_server(host="0.0.0.0", port=5000):
+    db.init()
     uvicorn.run(app, host=host, port=port)
+    db.close()

@@ -1,5 +1,6 @@
 from peewee import DoesNotExist, IntegrityError
 
+from movees import db
 from movees.db import Movie, Person, MoviePerson
 from movees.responses import Message
 from movees.responses import successes, errors
@@ -164,3 +165,8 @@ def delete_person(name):
         return errors.not_found(message=(Message.PERSON_NOT_FOUND % name))
     except Exception as e:
         return errors.error(e)
+
+
+def reset():
+    db.reset()
+    return successes.success(message=Message.RESET_DATABASE)
