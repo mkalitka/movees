@@ -6,6 +6,7 @@ import uvicorn
 
 from movees.db import crud
 from movees.api.response import create_json_response
+from movees.responses import Message
 from movees.responses.successes import success
 from movees.responses.errors import not_found, invalid, invalid_method
 
@@ -14,17 +15,17 @@ app = fastapi.FastAPI(default_response_class=fastapi.responses.JSONResponse)
 
 @app.exception_handler(fastapi.exceptions.RequestValidationError)
 async def validation_exception_handler(request, exc):
-    return create_json_response(invalid(data=exc.errors()))
+    return create_json_response(invalid(message=Message.INVALID_REQUEST))
 
 
 @app.exception_handler(404)
 async def not_found_handler(request, exc):
-    return create_json_response(not_found(message="Not found"))
+    return create_json_response(not_found(message=Message.NOT_FOUND))
 
 
 @app.exception_handler(405)
 async def method_not_allowed_handler(request, exc):
-    return create_json_response(invalid_method(message="Method not allowed"))
+    return create_json_response(invalid_method(message=Message.INVALID_METHOD))
 
 
 @app.get("/")
@@ -40,7 +41,7 @@ async def add_movie(title, year, person: List[str] = fastapi.Query(None)):
         people = [p.split(":") for p in people]
         for person in people:
             if len(person) != 2:
-                return create_json_response(invalid(message="Invalid person format"))
+                return create_json_response(invalid(message=Message.INVALID_PERSON))
     return create_json_response(crud.add_movie(title, year, people))
 
 
@@ -63,7 +64,7 @@ async def update_movie(
         people = [p.split(":") for p in people]
         for person in people:
             if len(person) != 2:
-                return create_json_response(invalid(message="Invalid person format"))
+                return create_json_response(invalid(message=Message.INVALID_PERSON))
     return create_json_response(crud.update_movie(title, new_title, year, people))
 
 

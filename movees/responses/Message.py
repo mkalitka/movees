@@ -14,5 +14,10 @@ class Message(str, Enum):
     PERSON_ALREADY_EXISTS = "Person %s already exists."
     PERSON_NOT_FOUND = "Person %s not found."
 
+    NOT_FOUND = "Not found."
+    INVALID_REQUEST = "Invalid request."
+    INVALID_METHOD = "Method not allowed."
+    INVALID_PERSON = "Invalid person format."
+
     def __str__(self):
         return self.value

@@ -22,8 +22,11 @@ def list_movies():
 def search_movie(title):
     """Search for a movie in the database."""
     response = crud.search_movie(title)
-    print("Movie found:")
-    print(format_movie(response["data"]))
+    if response["status_code"] == 200:
+        print("Movie found:")
+        print(format_movie(response["data"]))
+    else:
+        print(response["message"])
 
 
 def update_movie(title, new_title, year, people):
@@ -55,8 +58,11 @@ def list_people():
 def search_person(name):
     """Search for a person in the database."""
     response = crud.search_person(name)
-    print("Person found:")
-    print(format_person(response["data"]))
+    if response["status_code"] == 200:
+        print("Person found:")
+        print(format_person(response["data"]))
+    else:
+        print(response["message"])
 
 
 def update_person(name, new_name):
