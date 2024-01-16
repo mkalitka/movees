@@ -21,6 +21,53 @@ def create_parser():
         version=f"movees {__version__}",
     )
 
+    # server subparser
+    parser_server = subparsers.add_parser(
+        "server",
+        help="start the server",
+    )
+
+    parser_server.add_argument(
+        "-H",
+        "--host",
+        default="0.0.0.0",
+        help="host to run the server on",
+    )
+
+    parser_server.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=5000,
+        help="port to run the server on",
+    )
+
+    # remote subparser
+    parser_remote = subparsers.add_parser(
+        "remote",
+        help="connect to a remote server",
+    )
+
+    parser_remote.add_argument(
+        "-H",
+        "--host",
+        help="host of the remote server",
+    )
+
+    parser_remote.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        help="port of the remote server",
+    )
+
+    parser_remote.add_argument(
+        "-c",
+        "--clear",
+        action="store_true",
+        help="use local database instead of remote database",
+    )
+
     # list subparser
     subparsers.add_parser(
         "list",
@@ -214,27 +261,6 @@ def create_parser():
     subparsers.add_parser(
         "reset",
         help="reset the database",
-    )
-
-    # server subparser
-    parser_server = subparsers.add_parser(
-        "server",
-        help="start the server",
-    )
-
-    parser_server.add_argument(
-        "-H",
-        "--host",
-        default="0.0.0.0",
-        help="host to run the server on",
-    )
-
-    parser_server.add_argument(
-        "-p",
-        "--port",
-        type=int,
-        default=5000,
-        help="port to run the server on",
     )
 
     return parser

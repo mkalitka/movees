@@ -5,7 +5,7 @@ import uvicorn
 
 
 from movees.db import crud
-from movees.api.response import create_json_response
+from movees.server.response import create_json_response
 from movees.responses import Message
 from movees.responses.successes import success
 from movees.responses.errors import not_found, invalid, invalid_method

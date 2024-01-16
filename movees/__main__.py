@@ -1,27 +1,28 @@
 from movees import db
-from movees.db import crud
-from movees.api import server
+from movees.api import Api
+from movees.server import server
 from movees import cli
 from movees.utils.format_utils import format_movie, format_person
+from movees import config
 
 
-def add_movie(title, year, people):
+def add_movie(api, title, year, people):
     """Add a movie to the database."""
-    response = crud.add_movie(title, year, people)
+    response = api.add_movie(title, year, people)
     print(response["message"])
 
 
-def list_movies():
+def list_movies(api):
     """List all movies in the database."""
-    response = crud.list_movies()
+    response = api.list_movies()
     print("Movies:")
     for movie in response["data"]:
         print(format_movie(movie))
 
 
-def search_movie(title):
+def search_movie(api, title):
     """Search for a movie in the database."""
-    response = crud.search_movie(title)
+    response = api.search_movie(title)
     if response["status_code"] == 200:
         print("Movie found:")
         print(format_movie(response["data"]))
@@ -29,35 +30,35 @@ def search_movie(title):
         print(response["message"])
 
 
-def update_movie(title, new_title, year, people):
+def update_movie(api, title, new_title, year, people):
     """Update a movie in the database."""
-    response = crud.update_movie(title, new_title, year, people)
+    response = api.update_movie(title, new_title, year, people)
     print(response["message"])
 
 
-def delete_movie(title):
+def delete_movie(api, title):
     """Delete a movie from the database."""
-    response = crud.delete_movie(title)
+    response = api.delete_movie(title)
     print(response["message"])
 
 
-def add_person(name):
+def add_person(api, name):
     """Add a person to the database."""
-    response = crud.add_person(name)
+    response = api.add_person(name)
     print(response["message"])
 
 
-def list_people():
+def list_people(api):
     """List all people in the database."""
-    response = crud.list_people()
+    response = api.list_people()
     print("People:")
     for person in response["data"]:
         print(format_person(person))
 
 
-def search_person(name):
+def search_person(api, name):
     """Search for a person in the database."""
-    response = crud.search_person(name)
+    response = api.search_person(name)
     if response["status_code"] == 200:
         print("Person found:")
         print(format_person(response["data"]))
@@ -65,15 +66,15 @@ def search_person(name):
         print(response["message"])
 
 
-def update_person(name, new_name):
+def update_person(api, name, new_name):
     """Update a person in the database."""
-    response = crud.update_person(name, new_name)
+    response = api.update_person(name, new_name)
     print(response["message"])
 
 
-def delete_person(name):
+def delete_person(api, name):
     """Delete a person from the database."""
-    response = crud.delete_person(name)
+    response = api.delete_person(name)
     print(response["message"])
 
 
@@ -86,48 +87,89 @@ def main():
         parser.print_help()
         return
 
-    db.init()
+    config.init()
 
-    if cmdline_args.subcommand == "list":
-        list_movies()
-        list_people()
+    api = None
+    remote = False
+    conf = config.get_config()
+
+    if (
+        conf.has_option("remote", "host")
+        and conf.has_option("remote", "port")
+        and not conf.get("remote", "host") == ""
+        and not conf.get("remote", "port") == ""
+    ):
+        host = conf.get("remote", "host")
+        port = conf.get("remote", "port")
+        api = Api(host, port)
+        print(f"Using remote database at http://{host}:{port}")
+        remote = True
+    else:
+        api = Api()
+        db.init()
+
+    if cmdline_args.subcommand == "server":
+        print("Starting server...")
+        server.run_server(host=cmdline_args.host, port=cmdline_args.port)
+
+    elif cmdline_args.subcommand == "remote":
+        if cmdline_args.clear:
+            conf.set("remote", "host", "")
+            conf.set("remote", "port", "")
+            config.write()
+            print("Remote database cleared.")
+        else:
+            if cmdline_args.host is None or cmdline_args.port is None:
+                parser.print_help()
+                return
+            else:
+                conf.set("remote", "host", cmdline_args.host)
+                conf.set("remote", "port", str(cmdline_args.port))
+                config.write()
+                print(f"Remote database set to http://{cmdline_args.host}:{cmdline_args.port}")
+
+    elif cmdline_args.subcommand == "list":
+        list_movies(api)
+        list_people(api)
 
     elif cmdline_args.subcommand == "movie":
         if cmdline_args.action == "add":
-            add_movie(cmdline_args.title, cmdline_args.year, cmdline_args.person)
+            add_movie(api, cmdline_args.title, cmdline_args.year, cmdline_args.person)
         elif cmdline_args.action == "list":
-            list_movies()
+            list_movies(api)
         elif cmdline_args.action == "search":
-            search_movie(cmdline_args.title)
+            search_movie(api, cmdline_args.title)
         elif cmdline_args.action == "update":
             update_movie(
+                api,
                 cmdline_args.title,
                 cmdline_args.new_title,
                 cmdline_args.year,
                 cmdline_args.person,
             )
         elif cmdline_args.action == "delete":
-            delete_movie(cmdline_args.title)
+            delete_movie(api, cmdline_args.title)
 
     elif cmdline_args.subcommand == "person":
         if cmdline_args.action == "add":
-            add_person(cmdline_args.name)
+            add_person(api, cmdline_args.name)
         elif cmdline_args.action == "list":
-            list_people()
+            list_people(api)
         elif cmdline_args.action == "search":
-            search_person(cmdline_args.name)
+            search_person(api, cmdline_args.name)
         elif cmdline_args.action == "update":
-            update_person(cmdline_args.name, cmdline_args.new_name)
+            update_person(api, cmdline_args.name, cmdline_args.new_name)
         elif cmdline_args.action == "delete":
-            delete_person(cmdline_args.name)
+            delete_person(api, cmdline_args.name)
 
     elif cmdline_args.subcommand == "reset":
-        db.reset()
+        if remote:
+            print("Cannot reset remote database.")
+        else:
+            db.reset()
 
-    elif cmdline_args.subcommand == "server":
-        server.run_server(host=cmdline_args.host, port=cmdline_args.port)
-
-    db.close()
+    if not remote:
+        db.close()
 
 
 if __name__ == "__main__":

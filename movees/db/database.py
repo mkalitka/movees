@@ -2,19 +2,10 @@ import os
 
 from movees.db._base import db_file
 from movees.db.models import Movie, Person, MoviePerson
+from movees.utils import env
 
 
-if os.environ.get("MOVEES_DB_PATH"):
-    DATABASE_PATH = os.environ["MOVEES_DB_PATH"]
-else:
-    if os.name == "nt":
-        DATABASE_PATH = os.path.join(os.environ["APPDATA"], "movees", "database.db")
-    else:
-        DATABASE_PATH = os.path.join(
-            os.environ["HOME"], ".local", "share", "movees", "database.db"
-        )
-
-os.makedirs(os.path.dirname(os.path.abspath(DATABASE_PATH)), exist_ok=True)
+DATABASE_PATH = env.get_database_path()
 
 
 def init():
