@@ -1,6 +1,5 @@
 from movees import db
 from movees.db import crud
-from movees import api
 from movees.api import server
 from movees import cli
 from movees.utils.format_utils import format_movie, format_person
