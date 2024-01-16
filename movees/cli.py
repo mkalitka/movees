@@ -210,4 +210,31 @@ def create_parser():
         help="name of the person",
     )
 
+    # reset subparser
+    subparsers.add_parser(
+        "reset",
+        help="reset the database",
+    )
+
+    # server subparser
+    parser_server = subparsers.add_parser(
+        "server",
+        help="start the server",
+    )
+
+    parser_server.add_argument(
+        "-H",
+        "--host",
+        default="0.0.0.0",
+        help="host to run the server on",
+    )
+
+    parser_server.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        default=5000,
+        help="port to run the server on",
+    )
+
     return parser

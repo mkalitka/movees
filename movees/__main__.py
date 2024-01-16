@@ -1,127 +1,75 @@
-from peewee import DoesNotExist, IntegrityError
-
 from movees import db
+from movees.db import crud
+from movees import api
+from movees.api import server
 from movees import cli
-from movees.responses.client import Message
+from movees.utils.format_utils import format_movie, format_person
 
 
 def add_movie(title, year, people):
     """Add a movie to the database."""
-    try:
-        db.add_movie(title, year, people)
-        print(Message.ADD_MOVIE % title)
-    except IntegrityError:
-        print(Message.MOVIE_ALREADY_EXISTS % title)
+    response = crud.add_movie(title, year, people)
+    print(response["message"])
 
 
 def list_movies():
     """List all movies in the database."""
-    print(Message.LIST_MOVIES_PREFIX)
-    movies = db.list_movies()
-    for movie in movies:
-        if len(movie.people) == 0:
-            print(Message.DISPLAY_MOVIE_NO_PEOPLE % (movie.title, movie.year))
-        else:
-            people = ""
-            for person in movie.people:
-                people += f"{person.person.name} ({person.role}), "
-            people = people[:-2]
-            print(Message.DISPLAY_MOVIE % (movie.title, movie.year, people))
+    response = crud.list_movies()
+    print("Movies:")
+    for movie in response["data"]:
+        print(format_movie(movie))
 
 
 def search_movie(title):
     """Search for a movie in the database."""
-    try:
-        movie = db.search_movie(title)
-        people = ""
-        for person in movie.people:
-            people += f"{person.person.name} ({person.role}), "
-        people = people[:-2]
-        print(Message.DISPLAY_MOVIE % (movie.title, movie.year, people))
-    except DoesNotExist:
-        print(Message.MOVIE_NOT_FOUND % title)
+    response = crud.search_movie(title)
+    print("Movie found:")
+    print(format_movie(response["data"]))
 
 
 def update_movie(title, new_title, year, people):
     """Update a movie in the database."""
-    try:
-        db.update_movie(title, new_title, year, people)
-        print(Message.UPDATE_MOVIE % title)
-    except DoesNotExist:
-        print(Message.MOVIE_NOT_FOUND % title)
+    response = crud.update_movie(title, new_title, year, people)
+    print(response["message"])
 
 
 def delete_movie(title):
     """Delete a movie from the database."""
-    try:
-        db.delete_movie(title)
-        print(Message.DELETE_MOVIE % title)
-    except DoesNotExist:
-        print(Message.MOVIE_NOT_FOUND % title)
+    response = crud.delete_movie(title)
+    print(response["message"])
 
 
 def add_person(name):
     """Add a person to the database."""
-    try:
-        db.add_person(name)
-        print(Message.ADD_PERSON % name)
-    except IntegrityError:
-        print(Message.PERSON_ALREADY_EXISTS % name)
+    response = crud.add_person(name)
+    print(response["message"])
 
 
 def list_people():
     """List all people in the database."""
-    print(Message.LIST_PEOPLE_PREFIX)
-    people = db.list_people()
-    for person in people:
-        print(Message.DISPLAY_PERSON_PREFIX)
-        print(Message.DISPLAY_PERSON % person.name)
-        print(Message.DISPLAY_PERSON_MOVIES_PREFIX)
-        if len(person.movies) == 0:
-            print(Message.DISPLAY_PERSON_NO_MOVIES)
-        else:
-            for movie in person.movies:
-                print(
-                    Message.DISPLAY_PERSON_MOVIE
-                    % (movie.movie.title, movie.movie.year, movie.role)
-                )
+    response = crud.list_people()
+    print("People:")
+    for person in response["data"]:
+        print(format_person(person))
 
 
 def search_person(name):
     """Search for a person in the database."""
-    try:
-        person = db.search_person(name)
-        print(Message.DISPLAY_PERSON_PREFIX)
-        print(Message.DISPLAY_PERSON % person.name)
-        print(Message.DISPLAY_PERSON_MOVIES_PREFIX)
-        if len(person.movies) == 0:
-            print(Message.DISPLAY_PERSON_NO_MOVIES)
-        else:
-            for movie in person.movies:
-                print(
-                    Message.DISPLAY_PERSON_MOVIE
-                    % (movie.movie.title, movie.movie.year, movie.role)
-                )
-    except DoesNotExist:
-        print(Message.PERSON_NOT_FOUND % name)
+    response = crud.search_person(name)
+    print("Person found:")
+    print(format_person(response["data"]))
 
 
 def update_person(name, new_name):
     """Update a person in the database."""
-    try:
-        db.update_person(name, new_name)
-        print(Message.UPDATE_PERSON % name)
-    except DoesNotExist:
-        print(Message.PERSON_NOT_FOUND % name)
+    response = crud.update_person(name, new_name)
+    print(response["message"])
 
 
 def delete_person(name):
     """Delete a person from the database."""
-    try:
-        db.delete_person(name)
-        print(Message.DELETE_PERSON % name)
-    except DoesNotExist:
-        print(Message.PERSON_NOT_FOUND % name)
+    response = crud.delete_person(name)
+    print(response["message"])
 
 
 def main():
@@ -167,6 +115,12 @@ def main():
             update_person(cmdline_args.name, cmdline_args.new_name)
         elif cmdline_args.action == "delete":
             delete_person(cmdline_args.name)
+
+    elif cmdline_args.subcommand == "reset":
+        db.reset()
+
+    elif cmdline_args.subcommand == "server":
+        server.run_server(host=cmdline_args.host, port=cmdline_args.port)
 
     db.close()
 
