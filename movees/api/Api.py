@@ -87,7 +87,7 @@ class Api:
                     people_arg += f"&person={person}"
                 return self._post(f"/movie?title={title}&year={year}{people_arg}")
         else:
-            return crud.add_movie(title)
+            return crud.add_movie(title, year, people)
 
     def list_movies(self):
         if self.remote:
@@ -99,7 +99,7 @@ class Api:
         if self.remote:
             return self._get(f"/movie?title={title}")
         else:
-            return crud.search_movie()
+            return crud.search_movie(title)
 
     def update_movie(self, title, new_title, year, people):
         if self.remote:
@@ -114,7 +114,7 @@ class Api:
                 f"/movie?title={title}{new_title_arg}{year_arg}{people_arg}"
             )
         else:
-            return crud.update_movie(title, new_title, year)
+            return crud.update_movie(title, new_title, year, people)
 
     def delete_movie(self, title):
         if self.remote:

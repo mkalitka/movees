@@ -175,6 +175,7 @@ def create_parser():
     parser_movie_update.add_argument(
         "-y",
         "--year",
+        required=True,
         type=int,
         help="year of publication of the movie",
     )
@@ -260,6 +261,7 @@ def create_parser():
     parser_person_update.add_argument(
         "-m",
         "--new-name",
+        required=True,
         help="new name of the person",
     )
 

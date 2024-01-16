@@ -77,11 +77,10 @@ def update_movie(title, new_title, year, people):
         movie = Movie.get(Movie.title == title)
         if new_title is not None:
             movie.title = new_title
-        if year is not None:
-            movie.year = year
+        movie.year = year
+        for movieperson in MoviePerson.select().where(MoviePerson.movie == movie):
+            movieperson.delete_instance()
         if people is not None:
-            for movieperson in MoviePerson.select().where(MoviePerson.movie == movie):
-                movieperson.delete_instance()
             for person in people:
                 new_person = Person.get_or_create(name=person[0])[0]
                 movieperson = MoviePerson.create(
